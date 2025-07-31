@@ -2,39 +2,26 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB conectado"))
-  .catch(err => console.log("Erro MongoDB:", err));
+// Importando a conexão com o banco de dados
+const conn = require('./db/conn');  
 
-// Exemplo de schema simples
-const Player = mongoose.model('Player', {
-  nome: String,
-  vida: Number,
-  xp: Number
-});
+conn(); // Iniciando a conexão com o MongoDB
 
-// Rota GET
-app.get('/', (req, res) => {
-  res.json({ mensagem: "API Unreal está online" });
-});
+//routes
+const routes = require('./routes/router');
 
-// Rota POST - Salvar jogador
-app.post('/player', async (req, res) => {
-  const { nome, vida, xp } = req.body;
-  const novoPlayer = new Player({ nome, vida, xp });
-  await novoPlayer.save();
-  res.json({ status: "Salvo com sucesso", player: novoPlayer });
-});
+app.use('/api', routes);
 
-// Rota GET - Listar jogadores
-app.get('/player', async (req, res) => {
-  const players = await Player.find();
-  res.json(players);
+
+
+
+
+app.listen(3000, function() {
+    console.log('Servidor rodando na porta 3000');
 });
 
 // Porta para o Heroku
